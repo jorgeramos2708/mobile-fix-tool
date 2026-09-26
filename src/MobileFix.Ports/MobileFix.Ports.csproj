@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Puertos: contratos hacia el exterior. Sin implementaciones, sin dependencias de I/O. -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MobileFix.Ports</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MobileFix.Domain/MobileFix.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

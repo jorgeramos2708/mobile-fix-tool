@@ -1,0 +1,24 @@
+<Project>
+
+  <!--
+    Propiedades comunes a todos los proyectos.
+    Decisiones vinculantes: ADR-001 (WPF sobre .NET 10 LTS), ADR-004 (SQLite + Dapper, sin ORM).
+    El TargetFramework se declara en cada proyecto: net10.0 para dominio/infraestructura,
+    net10.0-windows para la aplicación de escritorio.
+  -->
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NeutralLanguage>es</NeutralLanguage>
+    <Company>MobileFix</Company>
+    <Product>MobileFix Tool</Product>
+    <Version>0.1.0</Version>
+    <Authors>jorge</Authors>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Casos de uso: orquesta las 13 etapas. Depende del dominio y de los puertos, nunca de la infraestructura.
+
+    Nota de nomenclatura (v0.1.0): este proyecto NO se llama MobileFix.Application a propósito.
+    Un namespace "Application" colgando del mismo root colisiona con System.Windows.Application
+    en el proyecto WPF: el compilador resuelve "Application" al namespace y no al tipo, y produce
+    CS0118 en App.xaml.cs. Renombrado a UseCases en lugar de calificar System.Windows.Application
+    en cada archivo de la interfaz.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MobileFix.UseCases</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MobileFix.Domain/MobileFix.Domain.csproj" />
+    <ProjectReference Include="../MobileFix.Ports/MobileFix.Ports.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,35 @@
+## Build / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userprefs
+*.dotCover
+*.binlog
+
+## Artefactos de instalación y firma
+artifacts/
+installer/out/
+*.msi
+*.msix
+*.wixpdb
+*.pfx
+*.snk
+*.p12
+*.key
+
+## Datos de ejecución (journal, evidencia, licencias locales, packs descargados)
+.mobilefix/
+journal/
+evidence/
+*.jsonl
+
+## Planificación y operación (no versionar datos de clientes ni del banco)
+inventario*.xlsx
+!docs/INVENTARIO-BANCO.xlsx
+
+## Sistema
+Thumbs.db
+desktop.ini
+.DS_Store

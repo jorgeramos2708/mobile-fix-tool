@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Infraestructura: implementaciones de los puertos. Aquí sí hay I/O y aquí llegará WinUSB, ADB, EDL... -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MobileFix.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MobileFix.Domain/MobileFix.Domain.csproj" />
+    <ProjectReference Include="../MobileFix.Ports/MobileFix.Ports.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    DOMINIO: cero dependencias de I/O. Se prueba sin hardware y sin disco.
+    Si alguna vez este proyecto necesita un paquete externo, es una señal de alarma.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MobileFix.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>
