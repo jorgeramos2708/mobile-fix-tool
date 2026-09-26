@@ -43,6 +43,18 @@ public sealed record InventoryStatistics
     /// <summary>Porcentaje de equipos identificados a nivel de modelo o superior. Objetivo de M2: 85 %.</summary>
     public required double IdentifiedAtModelLevelPercent { get; init; }
 
+    /// <summary>Equipos bloqueados a operador. En México es el mercado de importación de EEUU.</summary>
+    public required int CarrierLocked { get; init; }
+
+    /// <summary>Equipos cuya liberación la hace el operador en su portal (con requisitos de elegibilidad).</summary>
+    public required int UnlockViaPortal { get; init; }
+
+    /// <summary>Equipos cuya liberación es automática por parte del operador al cumplir su plazo.</summary>
+    public required int UnlockAutomatic { get; init; }
+
+    /// <summary>Equipos solo eSIM: no aceptan SIM física mexicana.</summary>
+    public required int EsimOnly { get; init; }
+
     public bool IsProvisional => Provenance != DataProvenance.Bench;
 
     public InterventionStats? Intervention(string name) =>
@@ -91,6 +103,10 @@ public sealed record InventoryStatistics
             IdentifiedAtModelLevelPercent = devices.Count == 0
                 ? 0d
                 : (double)devices.Count(device => device.IdentifiedAtModelLevel) / devices.Count,
+            CarrierLocked = devices.Count(device => device.CarrierLock == CarrierLockState.LockedToCarrier),
+            UnlockViaPortal = devices.Count(device => device.Unlock == UnlockPath.CarrierPortal),
+            UnlockAutomatic = devices.Count(device => device.Unlock == UnlockPath.CarrierAutomatic),
+            EsimOnly = devices.Count(device => device.Sim == SimType.EsimOnly),
         };
     }
 

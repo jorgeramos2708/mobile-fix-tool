@@ -50,6 +50,9 @@ public sealed class BenchCoverageTests
         T2 = t2,
         T3 = t3,
         T4 = t4,
+        Sim = SimType.PhysicalDual,
+        CarrierLock = CarrierLockState.Unlocked,
+        Unlock = UnlockPath.NotNeeded,
     };
 
     // ---------------------------------------------------------------- lectura del CSV
@@ -63,9 +66,15 @@ public sealed class BenchCoverageTests
         var dataset = new InventoryCsvReader().LoadFile(path);
 
         Assert.Empty(dataset.RejectedRows);
-        Assert.Equal(60, dataset.Devices.Count);
+        Assert.Equal(72, dataset.Devices.Count);
         Assert.Equal(DataProvenance.SeededDemo, dataset.Provenance);
         Assert.True(dataset.IsProvisional);
+
+        // El mercado mexicano incluye una parte grande de equipos importados de EEUU y bloqueados.
+        var statistics = InventoryStatistics.From(dataset);
+        Assert.True(statistics.CarrierLocked >= 20, $"se esperaban equipos bloqueados a operador, hay {statistics.CarrierLocked}");
+        Assert.True(statistics.UnlockViaPortal > 0);
+        Assert.True(statistics.EsimOnly > 0);
     }
 
     [Fact]
@@ -258,5 +267,90 @@ public sealed class BenchCoverageTests
     public void El_mecanismo_esperado_se_deriva_del_fabricante_del_soc(string socVendor, AccessMechanism expected)
     {
         Assert.Equal(expected, CoverageResolver.MechanismFor(socVendor));
+    }
+
+    // ---------------------------------------------------------------- bloqueo de operador
+
+    [Fact]
+    public void Parsea_el_bloqueo_de_operador_y_la_ruta_de_liberacion()
+    {
+        const string csv = """
+            # provenance=bench
+            id,brand,model,soc_vendor,platform,mechanism,requires_auth,condition,max_level,t1,t2,t3,t4,carrier,carrier_lock,unlock_path,sim
+            BF-950,Samsung,Galaxy S23 US,Qualcomm,android,edl_qc,third_party,boots,L4,yes,yes,no,partial,att,locked,carrier_portal,physical_single
+            BF-951,Apple,iPhone 14 US,Apple,ios,dfu_apple,own,boots,L5,yes,yes,no,partial,metro,locked,carrier_portal,esim_only
+            BF-952,Samsung,Galaxy A03,MediaTek,android,brom_mtk,none,boots,L4,yes,yes,partial,partial,,unlocked,not_needed,physical_dual
+            """;
+
+        var dataset = new InventoryCsvReader().Load(new StringReader(csv));
+
+        Assert.Equal(3, dataset.Devices.Count);
+
+        var locked = dataset.Devices[0];
+        Assert.Equal(CarrierLockState.LockedToCarrier, locked.CarrierLock);
+        Assert.Equal(UnlockPath.CarrierPortal, locked.Unlock);
+        Assert.Equal("att", locked.Carrier);
+        Assert.Equal(SimType.PhysicalSingle, locked.Sim);
+
+        Assert.Equal(SimType.EsimOnly, dataset.Devices[1].Sim);
+        Assert.Equal(CarrierLockState.Unlocked, dataset.Devices[2].CarrierLock);
+        Assert.Equal(UnlockPath.NotNeeded, dataset.Devices[2].Unlock);
+    }
+
+    [Fact]
+    public void Un_equipo_bloqueado_anade_la_advertencia_de_liberacion_al_veredicto()
+    {
+        var dataset = new InventoryDataset
+        {
+            Provenance = DataProvenance.Bench,
+            Devices =
+            [
+                Device("A") with
+                {
+                    Carrier = "att",
+                    CarrierLock = CarrierLockState.LockedToCarrier,
+                    Unlock = UnlockPath.CarrierPortal,
+                },
+            ],
+        };
+
+        var assessment = new CoverageResolver(dataset).Resolve(Fingerprint("MediaTek"));
+
+        Assert.Contains(assessment.Reasons, reason => reason.Contains("bloqueados a operador", StringComparison.Ordinal));
+        Assert.Contains(assessment.Reasons, reason => reason.Contains("nunca por bypass", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Un_equipo_solo_esim_se_advierte_en_el_veredicto()
+    {
+        var dataset = new InventoryDataset
+        {
+            Provenance = DataProvenance.Bench,
+            Devices = [Device("A") with { SocVendor = "Apple", Sim = SimType.EsimOnly }],
+        };
+
+        var assessment = new CoverageResolver(dataset).Resolve(Fingerprint("Apple"));
+
+        Assert.Contains(assessment.Reasons, reason => reason.Contains("solo eSIM", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData(UnlockPath.CarrierPortal, true)]
+    [InlineData(UnlockPath.CarrierAutomatic, true)]
+    [InlineData(UnlockPath.NotNeeded, false)]
+    [InlineData(UnlockPath.Unsupported, false)]
+    [InlineData(UnlockPath.Unknown, false)]
+    public void Solo_la_via_del_operador_es_accionable(UnlockPath path, bool expected)
+    {
+        Assert.Equal(expected, UnlockGuidance.IsActionable(path));
+    }
+
+    [Fact]
+    public void La_plataforma_nunca_libera_por_bypass()
+    {
+        // Esta asercion existe para que quitar la prohibicion requiera borrar una prueba,
+        // no solo cambiar una linea de codigo sin que nadie se entere.
+        Assert.False(UnlockGuidance.BypassIsEverAllowed);
+        Assert.Contains("operador", UnlockGuidance.Describe(UnlockPath.CarrierPortal, "att"), StringComparison.Ordinal);
     }
 }

@@ -110,6 +110,17 @@ internal static class Program
         }
 
         Console.WriteLine();
+        Console.WriteLine("Bloqueo de operador y liberación (importación de EEUU)");
+        Console.WriteLine(new string('-', 78));
+        Console.WriteLine($"  Equipos bloqueados a operador ............... {statistics.CarrierLocked,4} de {statistics.Total}");
+        Console.WriteLine($"  Liberación por portal del operador .......... {statistics.UnlockViaPortal,4}   (requiere elegibilidad)");
+        Console.WriteLine($"  Liberación automática del operador .......... {statistics.UnlockAutomatic,4}   (al cumplir el plazo)");
+        Console.WriteLine($"  Solo eSIM (no acepta SIM física mexicana) ... {statistics.EsimOnly,4}");
+        Console.WriteLine();
+        Console.WriteLine("  Política: la plataforma NUNCA libera por bypass. Lee el bloqueo, comprueba");
+        Console.WriteLine("  elegibilidad, guía al trámite del operador y documenta el resultado.");
+
+        Console.WriteLine();
         Console.WriteLine("KPI del hito M0");
         Console.WriteLine(new string('-', 78));
         Console.WriteLine($"  Equipos fichados ......................... {statistics.Total,5}   (objetivo: 150-300)");

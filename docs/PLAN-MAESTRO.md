@@ -905,6 +905,50 @@ Cualquier prototipo que nazca sobre .NET 9 nace con EOL encima. La única versi�
 
 ---
 
+## 26. Liberación de equipos de operador (mercado de importación de EEUU)
+
+> Añadido en v2.1. En México una parte enorme del mercado son equipos importados de Estados Unidos
+> bloqueados a AT&T, T-Mobile, Verizon, Metro, Cricket o Boost. Es una línea de negocio real del taller
+> y hay que atenderla **sin** entrar en el terreno prohibido.
+
+### 26.1 Lo que la plataforma sí hace
+
+| Capacidad | Cómo |
+|---|---|
+| **Leer** el estado del bloqueo | Del propio equipo: política del operador y estado de activación |
+| **Comprobar elegibilidad** | Requisitos del operador: equipo pagado, contrato cumplido, plazo. Verizon libera a los 60 días; el prepago suele exigir de 6 a 12 meses |
+| **Guiar el trámite oficial** | Instrucciones del portal del operador, con el modelo exacto y el número de serie |
+| **Verificar** el resultado | Volver a leer el estado tras la liberación y confirmar el cambio |
+| **Documentar** | La liberación queda en la orden de servicio con evidencia: el taller puede cobrarla y demostrarla |
+| **Advertir de la trampa de la eSIM** | Un iPhone 14, 15 o 16 de EEUU (A2649, A2846, A3081) es **solo eSIM**: no acepta SIM física mexicana. Es la causa número uno de devoluciones en este negocio |
+
+### 26.2 Lo que la plataforma nunca hace (permanente)
+
+Liberar por bypass, por exploitation, mediante servicios de terceros no autorizados o reescribiendo el IMEI;
+tampoco trabajar sobre equipos con propiedad no verificada o reportados como robados. La prueba unitaria
+`La_plataforma_nunca_libera_por_bypass` existe precisamente para que quitar esta prohibición exija
+**borrar una prueba** y no solo cambiar una línea de código sin que nadie se entere.
+
+### 26.3 Por qué es un diferenciador y no una limitación
+
+La competencia (Chimera y similares) vende eliminación de FRP y reparación de IMEI —terreno que este producto
+tiene prohibido— y acaba de añadir «Carrier Relock» a su catálogo. Nosotros vendemos lo contrario:
+**liberación legítima, verificada y documentada con certificado**. Eso es exactamente lo que compra un taller
+con abogado y con seguro, y es lo que el dueño puede enseñar al cliente cuando este dice que le devolvieron
+un equipo bloqueado.
+
+### 26.4 Implementación
+
+- **Catálogo** (`docs/catalogo-mx.csv`): 170 modelos del mercado mexicano con las variantes de operador de
+  EEUU, su SoC, su placa, su firmware base, su mecanismo y su ruta de liberación (`unlock_path`).
+- **Inventario** (`docs/inventario-demo.csv`): el estado observado por equipo (bloqueado, operador, SIM).
+- **Domain**: `CarrierLockState`, `UnlockPath`, `SimType` y `UnlockGuidance` — el texto de orientación para el
+  técnico, para que la respuesta ante un equipo bloqueado sea siempre la misma y siempre legítima.
+- **Veredicto**: un equipo bloqueado añade automáticamente la advertencia de liberación al veredicto de
+  cobertura, y un grupo con equipos solo eSIM añade la advertencia de SIM.
+
+---
+
 ## Apéndice A — Esquema de carpetas propuesto
 
 ```
@@ -913,8 +957,12 @@ NAVAJA/
 │  ├─ Desktop.App/            (WinUI/WPF/Avalonia — solo presentación)
 │  ├─ Desktop.ViewModels/
 │  ├─ DesignSystem/           (§24 — tokens, temas, componentes reutilizables)
-│  ├─ Application/            (orquestación de las 13 etapas, casos de uso)
+│  ├─ UseCases/               (orquestación de las 13 etapas; se llama UseCases y no Application
+│  │                           porque un namespace «Application» colisiona con System.Windows.Application
+│  │                           y produce CS0118 en cualquier archivo WPF)
 │  ├─ Domain/                 (CERO I/O — modelo, reglas, cobertura, evidencia)
+│  ├─ Domain/Inventory/       (§26 — catálogo, cobertura medida, bloqueo de operador)
+│  ├─ Cli/                    (autocomprobación de invariantes y matriz de cobertura)
 │  ├─ Ports/                  (interfaces de adaptadores: ITransport, IInstrument…)
 │  ├─ Identification/         (escalera L0–L6, resolución, Signature DB)
 │  ├─ Diagnostics/            (suite funcional)

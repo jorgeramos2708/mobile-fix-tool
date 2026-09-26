@@ -34,6 +34,10 @@ public sealed class InventoryCsvReader : IInventorySource
         ["max_level"] = "max_level", ["nivel"] = "max_level", ["nivel max. alcanzable"] = "max_level",
         ["t1"] = "t1", ["t2"] = "t2", ["t3"] = "t3", ["t4"] = "t4",
         ["bench_location"] = "bench_location", ["ubicacion"] = "bench_location", ["ubicacion en banco"] = "bench_location",
+        ["carrier"] = "carrier", ["operador"] = "carrier",
+        ["carrier_lock"] = "carrier_lock", ["bloqueo"] = "carrier_lock", ["bloqueo de operador"] = "carrier_lock",
+        ["unlock_path"] = "unlock_path", ["liberacion"] = "unlock_path", ["ruta de liberacion"] = "unlock_path",
+        ["sim"] = "sim",
         ["notes"] = "notes", ["notas"] = "notes",
     };
 
@@ -173,6 +177,10 @@ public sealed class InventoryCsvReader : IInventorySource
             T2 = ParseSupport(Get("t2")),
             T3 = ParseSupport(Get("t3")),
             T4 = ParseSupport(Get("t4")),
+            Sim = ParseSim(Get("sim")),
+            Carrier = Empty(Get("carrier")),
+            CarrierLock = ParseCarrierLock(Get("carrier_lock")),
+            Unlock = ParseUnlockPath(Get("unlock_path")),
             BenchLocation = Empty(Get("bench_location")),
             Notes = Empty(Get("notes")),
         };
@@ -253,6 +261,37 @@ public sealed class InventoryCsvReader : IInventorySource
         "bricked" or "brick total" => DeviceCondition.Bricked,
         "dead" or "muerto" or "muerto (hardware)" => DeviceCondition.Dead,
         _ => DeviceCondition.Unknown,
+    };
+
+    /// <summary>Estado del bloqueo de operador. Es descriptivo: un valor raro no invalida la fila.</summary>
+    private static CarrierLockState ParseCarrierLock(string text) => Normalise(text) switch
+    {
+        "locked" or "bloqueado" or "bloqueado a operador" => CarrierLockState.LockedToCarrier,
+        "unlocked" or "liberado" or "desbloqueado" => CarrierLockState.Unlocked,
+        "na" or "no aplica" => CarrierLockState.NotApplicable,
+        _ => CarrierLockState.Unknown,
+    };
+
+    /// <summary>
+    /// Ruta de liberación. Un valor ausente se marca como desconocido, nunca como «no hace falta»:
+    /// dar por libre un equipo bloqueado es el error que más caro le sale al taller.
+    /// </summary>
+    private static UnlockPath ParseUnlockPath(string text) => Normalise(text) switch
+    {
+        "not_needed" or "no requiere" => UnlockPath.NotNeeded,
+        "carrier_portal" or "portal del operador" => UnlockPath.CarrierPortal,
+        "carrier_automatic" or "automatica" or "automatico" => UnlockPath.CarrierAutomatic,
+        "unsupported" or "no soportado" => UnlockPath.Unsupported,
+        _ => UnlockPath.Unknown,
+    };
+
+    private static SimType ParseSim(string text) => Normalise(text) switch
+    {
+        "physical_single" => SimType.PhysicalSingle,
+        "physical_dual" => SimType.PhysicalDual,
+        "hybrid" => SimType.Hybrid,
+        "esim_only" or "esim" => SimType.EsimOnly,
+        _ => SimType.Unknown,
     };
 
     private static EscaleraLevel ParseLevel(string text)

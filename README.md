@@ -22,7 +22,9 @@ auditable y sin brickear equipos.
 | Autocomprobación ejecutable (CLI) de las invariantes | ✅ |
 | **Motor de cobertura**: lee el inventario del banco, calcula la matriz y resuelve el veredicto por dispositivo | ✅ M2-03 |
 | **Honestidad de cobertura**: procedencia declarada; con datos de ejemplo todo veredicto es PROVISIONAL | ✅ |
-| Inventario de ejemplo (60 equipos, taller LATAM) + plantilla para el banco real | ✅ |
+| **Catálogo del mercado mexicano**: 170 modelos con SoC, placa, firmware base, mecanismo y ruta de liberación | ✅ |
+| **Bloqueo de operador**: 22 equipos importados de EEUU; liberación solo por el operador, nunca por bypass | ✅ §26 |
+| Inventario de ejemplo (72 equipos) + plantilla para el banco real | ✅ |
 | Identificación real (escalera L0–L6), hardware, plugins OEM | ⏳ M0–M2 |
 
 **Nada de esto toca todavía un dispositivo real.** Es la base sobre la que se construye el HAL.
@@ -70,15 +72,25 @@ dotnet run --project src/MobileFix.Desktop
 dotnet run --project src/MobileFix.Cli -- --coverage docs/inventario-demo.csv
 ```
 
-### Inventario del banco
+### Catálogo e inventario
 
-- `docs/inventario-demo.csv` — **contrato de máquina**: 60 equipos de ejemplo (taller LATAM), con
-  procedencia declarada en la cabecera. Es lo que lee el motor de cobertura.
-- `docs/INVENTARIO-BANCO-DEMO.xlsx` — la misma información para verla en Excel.
-- `docs/INVENTARIO-BANCO.xlsx` — **plantilla vacía** para fichar el banco real (M0-01).
+Son dos cosas distintas y se mantienen separadas a propósito:
 
-> Con `provenance=seeded-demo` la cobertura es **provisional** y se muestra como tal en la CLI y en la
-> aplicación. Solo con `provenance=bench` la plataforma declara cobertura medida.
+| Archivo | Qué es |
+|---|---|
+| `docs/catalogo-mx.csv` | **Conocimiento**: 170 modelos del mercado mexicano con las variantes de operador de EEUU. SoC, placa, firmware base, mecanismo de acceso, ruta de liberación y nivel de confianza del dato |
+| `docs/CATALOGO-MX.xlsx` | La misma información para verla en Excel |
+| `docs/inventario-demo.csv` | **Evidencia**: 72 equipos del banco de ejemplo (22 importados de EEUU y bloqueados a operador). Es lo que lee el motor de cobertura |
+| `docs/INVENTARIO-BANCO-DEMO.xlsx` | La misma información para verla en Excel |
+| `docs/INVENTARIO-BANCO.xlsx` | **Plantilla vacía** para fichar el banco real (M0-01) |
+
+> **El catálogo describe qué ES cada equipo. El inventario describe qué se ha MEDIDO con él.**
+> Mezclarlos hace que la matriz de cobertura mienta, así que el motor de cobertura solo lee el inventario,
+> y con `provenance=seeded-demo` todo veredicto sale marcado **PROVISIONAL**. Solo con `provenance=bench`
+> la plataforma declara cobertura medida.
+
+Los campos del catálogo con `confidence=media` deben validarse contra el equipo físico antes de darlos por
+buenos: un código de modelo o un SoC equivocado contamina la identificación.
 
 La autocomprobación crea su journal en `%LOCALAPPDATA%\MobileFixDemo\` y termina con código 0
 solo si **las cinco invariantes** se cumplen:

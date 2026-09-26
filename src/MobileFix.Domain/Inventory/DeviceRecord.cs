@@ -91,6 +91,17 @@ public sealed record DeviceRecord
     public required SupportLevel T2 { get; init; }
     public required SupportLevel T3 { get; init; }
     public required SupportLevel T4 { get; init; }
+
+    /// <summary>Tipo de SIM del equipo: un iPhone de EEUU desde el 14 no acepta SIM física mexicana.</summary>
+    public required SimType Sim { get; init; }
+
+    /// <summary>Operador al que está bloqueado, si lo está (att, tmobile, verizon, metro, cricket, boost).</summary>
+    public string? Carrier { get; init; }
+
+    public required CarrierLockState CarrierLock { get; init; }
+
+    public required UnlockPath Unlock { get; init; }
+
     public string? BenchLocation { get; init; }
     public string? Notes { get; init; }
 

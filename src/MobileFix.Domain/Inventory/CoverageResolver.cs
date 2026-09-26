@@ -54,6 +54,25 @@ public sealed class CoverageResolver(InventoryDataset dataset)
             ? "ningún equipo del grupo demuestra reparación alcanzable"
             : $"{repairEvidence} de {matching.Length} equipos demuestran reparación alcanzable");
 
+        var locked = matching.Where(device => device.CarrierLock == CarrierLockState.LockedToCarrier).ToArray();
+        if (locked.Length > 0)
+        {
+            var carriers = locked
+                .Select(device => string.IsNullOrWhiteSpace(device.Carrier) ? "operador no declarado" : device.Carrier!)
+                .Distinct()
+                .Take(3);
+
+            reasons.Add(
+                $"{locked.Length} de {matching.Length} equipos están bloqueados a operador ({string.Join(", ", carriers)}): " +
+                "la liberación es solo por el operador, nunca por bypass");
+        }
+
+        var esimOnly = matching.Count(device => device.Sim == SimType.EsimOnly);
+        if (esimOnly > 0)
+        {
+            reasons.Add($"{esimOnly} equipo(s) del grupo son solo eSIM: no aceptan SIM física mexicana");
+        }
+
         if (_dataset.IsProvisional)
         {
             reasons.Add("PROVISIONAL: calculado con datos de ejemplo, no con mediciones del banco");
