@@ -25,9 +25,11 @@ journal/
 evidence/
 *.jsonl
 
-## Planificación y operación (no versionar datos de clientes ni del banco)
-inventario*.xlsx
+## Hojas de cálculo: se versionan la plantilla del banco y el inventario de ejemplo; el resto no.
+## (En Windows git ignora sin distinguir mayúsculas, así que la negación tiene que ser explícita.)
+*.xlsx
 !docs/INVENTARIO-BANCO.xlsx
+!docs/INVENTARIO-BANCO-DEMO.xlsx
 
 ## Copias de seguridad y temporales que no deben versionarse
 *.bak
