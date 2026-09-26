@@ -137,7 +137,8 @@ public sealed class RepairSessionInvariantTests
 
         service.Connect(session, "USB simulado");
         service.Identify(session, TestSupport.Fingerprint());
-        service.Classify(session, CoverageAssessment.Evaluate(CoverageVerdict.Partial, "parcial"));
+        service.Classify(session, CoverageAssessment.Evaluate(
+            CoverageVerdict.Partial, CoverageEvidence.SeededDemo, "parcial"));
         service.Diagnose(session, "batería OK");
         service.Correlate(session, "sin correlación relevante");
         service.CheckConstraints(session, "sin bloqueos duros", hardBlocker: false);
@@ -186,7 +187,8 @@ public sealed class RepairSessionInvariantTests
 
         service.Connect(session, "USB simulado");
         service.Identify(session, TestSupport.Fingerprint());
-        service.Classify(session, CoverageAssessment.Evaluate(CoverageVerdict.Full));
+        service.Classify(session, CoverageAssessment.Evaluate(
+            CoverageVerdict.Full, CoverageEvidence.SeededDemo));
         service.Diagnose(session, "OK");
         service.Correlate(session, "OK");
         service.CheckConstraints(session, "OK", hardBlocker: false);

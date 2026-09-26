@@ -19,7 +19,7 @@ public sealed class CoverageAndFingerprintTests
         RiskLevel expectedRisk,
         bool expectedWriting)
     {
-        var coverage = CoverageAssessment.Evaluate(verdict);
+        var coverage = CoverageAssessment.Evaluate(verdict, CoverageEvidence.BenchMeasured);
 
         Assert.Equal(expectedRisk, coverage.AllowedRisk);
         Assert.Equal(expectedWriting, coverage.AllowsWriting);
@@ -35,7 +35,8 @@ public sealed class CoverageAndFingerprintTests
                      CoverageVerdict.Unsupported,
                  })
         {
-            var coverage = CoverageAssessment.Evaluate(verdict, "sin ruta legítima disponible");
+            var coverage = CoverageAssessment.Evaluate(
+                verdict, CoverageEvidence.BenchMeasured, "sin ruta legítima disponible");
 
             Assert.False(coverage.AllowsWriting, $"{verdict} no debería permitir escritura.");
         }
@@ -46,6 +47,7 @@ public sealed class CoverageAndFingerprintTests
     {
         var coverage = CoverageAssessment.Evaluate(
             CoverageVerdict.Partial,
+            CoverageEvidence.BenchMeasured,
             "BROM accesible",
             "requiere auth file legítimo");
 

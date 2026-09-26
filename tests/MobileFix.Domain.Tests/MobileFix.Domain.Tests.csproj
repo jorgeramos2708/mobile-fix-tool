@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -16,6 +16,12 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!-- Inventario de ejemplo: se copia junto al ensamblado para que las pruebas sean deterministas
+       y no dependan de rutas relativas al repositorio. -->
+  <ItemGroup>
+    <Content Include="../../docs/inventario-demo.csv" Link="inventario-demo.csv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

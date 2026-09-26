@@ -1,26 +1,23 @@
 using System.Text;
-using MobileFix.UseCases;
 using MobileFix.Domain;
 using MobileFix.Infrastructure;
 using MobileFix.Ports;
+using MobileFix.UseCases;
 
 namespace MobileFix.Cli;
 
 /// <summary>
-/// Autocomprobación de la plataforma. No sustituye a las pruebas unitarias (llegan con el banco),
-/// pero valida hoy las invariantes que sostienen la seguridad del producto:
+/// Autocomprobación de la plataforma. Dos modos:
 ///
-///   1. Las 13 etapas se ejecutan en orden y quedan registradas.
-///   2. El Punto Único de Escritura: sin respaldo verificado no se puede reparar.
-///   3. El Safety Gate bloquea la escritura cuando falta un requisito.
-///   4. El orden del pipeline no se puede saltar.
-///   5. El journal detecta cualquier alteración de sus entradas.
+///   mobilefix-check                     valida las invariantes del dominio y del journal
+///   mobilefix-check --coverage [ruta]   calcula la matriz de cobertura desde el inventario
+///
+/// No sustituye a las pruebas unitarias, pero demuestra en un ejecutable que las invariantes que
+/// sostienen la seguridad del producto se cumplen de verdad.
 /// </summary>
 internal static class Program
 {
-    private const string Title = "MobileFix Tool - autocomprobacion de la plataforma";
-
-    private static int Main()
+    private static int Main(string[] args)
     {
         try
         {
@@ -31,10 +28,170 @@ internal static class Program
             // Salida redirigida sin consola: irrelevante para la comprobación.
         }
 
+        if (args.Length > 0 && args[0] is "--coverage" or "-c")
+        {
+            return RunCoverage(args.Length > 1 ? args[1] : FindDefaultInventory());
+        }
+
+        return RunInvariants();
+    }
+
+    // ------------------------------------------------------------------ modo cobertura
+
+    private static int RunCoverage(string? path)
+    {
+        Console.WriteLine(new string('=', 78));
+        Console.WriteLine("MobileFix Tool - matriz de cobertura del banco");
+        Console.WriteLine(new string('=', 78));
+        Console.WriteLine();
+
+        if (path is null || !File.Exists(path))
+        {
+            Console.WriteLine("No se encontró el inventario.");
+            Console.WriteLine("Uso: mobilefix-check --coverage <ruta al csv>");
+            Console.WriteLine("Plantilla y datos de ejemplo: docs/inventario-demo.csv");
+            return 2;
+        }
+
+        var coverage = new BenchCoverageService(new InventoryCsvReader()).Load(path);
+        var statistics = coverage.Statistics;
+
+        Console.WriteLine($"Archivo:     {coverage.SourcePath}");
+        Console.WriteLine($"Procedencia: {statistics.Provenance}");
+
+        if (coverage.IsProvisional)
+        {
+            Console.WriteLine();
+            Console.WriteLine("  ################################################################");
+            Console.WriteLine("  #  PROVISIONAL: calculado con datos de ejemplo, no medidos.      #");
+            Console.WriteLine("  #  No usar para decidir alcance ni para afirmar cobertura.      #");
+            Console.WriteLine("  ################################################################");
+        }
+
+        if (coverage.Dataset.RejectedRows.Count > 0)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"Filas descartadas: {coverage.Dataset.RejectedRows.Count}");
+            foreach (var rejected in coverage.Dataset.RejectedRows)
+            {
+                Console.WriteLine($"  - {rejected}");
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Equipos por mecanismo de acceso");
+        Console.WriteLine(new string('-', 78));
+        Console.WriteLine($"  {"Mecanismo",-24} {"Equipos",8} {"Con credencial",16} {"% del banco",12}");
+
+        foreach (var mechanism in statistics.ByMechanism.Where(stats => stats.HasEvidence))
+        {
+            var percent = statistics.Total == 0 ? 0d : (double)mechanism.Devices / statistics.Total;
+            Console.WriteLine($"  {mechanism.Mechanism,-24} {mechanism.Devices,8} {mechanism.RequiringCredentials,16} {percent,11:P0}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Nivel más alto alcanzado (escalera L0-L6)");
+        Console.WriteLine(new string('-', 78));
+        foreach (var level in statistics.ByLevel.Where(stats => stats.Devices > 0))
+        {
+            Console.WriteLine($"  {level.Level,-6} {level.Devices,4} equipos");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Cobertura por nivel de intervención");
+        Console.WriteLine(new string('-', 78));
+        Console.WriteLine($"  {"Nivel",-18} {"Sí",5} {"Parcial",8} {"No",5} {"N/A",5} {"Alcanzable",12}");
+
+        foreach (var intervention in statistics.ByIntervention)
+        {
+            Console.WriteLine(
+                $"  {intervention.Name,-18} {intervention.Yes,5} {intervention.Partial,8} " +
+                $"{intervention.No,5} {intervention.NotApplicable,5} {intervention.ReachablePercent,11:P0}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("KPI del hito M0");
+        Console.WriteLine(new string('-', 78));
+        Console.WriteLine($"  Equipos fichados ......................... {statistics.Total,5}   (objetivo: 150-300)");
+        Console.WriteLine($"  Mecanismos con al menos 1 equipo ......... {statistics.MechanismsWithEvidence,5}   (objetivo M0: 4)");
+        Console.WriteLine($"  Identificados a nivel de modelo o más .... {statistics.IdentifiedAtModelLevelPercent,10:P0}   (objetivo M2: 85%)");
+
+        var t2 = statistics.Intervention("T2 arranque");
+        var t3 = statistics.Intervention("T3 particiones");
+        Console.WriteLine($"  Reparación de arranque alcanzable ........ {(t2?.ReachablePercent ?? 0d),10:P0}   (objetivo M5: 50% en «sí»)");
+        Console.WriteLine($"  Reparación de particiones alcanzable ..... {(t3?.ReachablePercent ?? 0d),10:P0}   (objetivo M7: 70% en «sí»)");
+
+        Console.WriteLine();
+        Console.WriteLine("Resolución de veredictos (¿qué puedo hacer con este equipo?)");
+        Console.WriteLine(new string('-', 78));
+
+        foreach (var fingerprint in SampleFingerprints())
+        {
+            var assessment = coverage.Resolve(fingerprint);
+            var provisional = assessment.IsProvisional ? "  [PROVISIONAL]" : string.Empty;
+            Console.WriteLine(
+                $"  {fingerprint.SocVendor,-22} {fingerprint.Model,-22} -> {assessment.Verdict,-20} " +
+                $"escritura: {(assessment.AllowsWriting ? "sí" : "no"),-3}{provisional}");
+
+            foreach (var reason in assessment.Reasons.Take(2))
+            {
+                Console.WriteLine($"      · {reason}");
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine(coverage.Describe());
+        return 0;
+    }
+
+    private static IEnumerable<DeviceFingerprint> SampleFingerprints()
+    {
+        yield return Fingerprint("MediaTek", "Galaxy A13");
+        yield return Fingerprint("Qualcomm", "Moto G52");
+        yield return Fingerprint("Unisoc", "Spark 10");
+        yield return Fingerprint("Exynos", "Galaxy A53 5G");
+        yield return Fingerprint("Apple", "iPhone 12");
+        yield return Fingerprint("Ficticio Semiconductor", "Modelo Z");
+    }
+
+    private static DeviceFingerprint Fingerprint(string socVendor, string model) => new()
+    {
+        SocVendor = socVendor,
+        SocModel = "leído en el handshake",
+        Oem = "fabricante",
+        Model = model,
+        ConfidencePercent = 96,
+        HighestSource = FingerprintSource.BuildProperties,
+    };
+
+    private static string? FindDefaultInventory()
+    {
+        var candidates = new List<string>
+        {
+            Path.Combine(AppContext.BaseDirectory, "inventario-demo.csv"),
+            Path.Combine(Directory.GetCurrentDirectory(), "inventario-demo.csv"),
+            Path.Combine(Directory.GetCurrentDirectory(), "docs", "inventario-demo.csv"),
+        };
+
+        // En desarrollo, subir desde bin/Debug hasta la raíz del repositorio.
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            candidates.Add(Path.Combine(directory.FullName, "docs", "inventario-demo.csv"));
+            directory = directory.Parent;
+        }
+
+        return candidates.FirstOrDefault(File.Exists);
+    }
+
+    // ------------------------------------------------------------------ modo invariantes
+
+    private static int RunInvariants()
+    {
         var results = new List<(string Name, bool Ok, string Detail)>();
 
         Console.WriteLine(new string('=', 78));
-        Console.WriteLine(Title);
+        Console.WriteLine("MobileFix Tool - autocomprobacion de la plataforma");
         Console.WriteLine(new string('=', 78));
 
         var root = Path.Combine(
@@ -84,8 +241,9 @@ internal static class Program
         var gateBlocked = TryStep(() =>
         {
             service.Connect(blockedSession, "USB simulado");
-            service.Identify(blockedSession, SampleFingerprint());
-            service.Classify(blockedSession, CoverageAssessment.Evaluate(CoverageVerdict.Partial, "mecanismo accesible en modo solo lectura"));
+            service.Identify(blockedSession, Fingerprint("MediaTek", "Galaxy A13"));
+            service.Classify(blockedSession, CoverageAssessment.Evaluate(
+                CoverageVerdict.Partial, CoverageEvidence.SeededDemo, "mecanismo accesible en modo solo lectura"));
             service.Diagnose(blockedSession, "bateria 42%, almacenamiento OK");
             service.Correlate(blockedSession, "caso similar: bootloop por particion boot corrupta");
             service.CheckConstraints(blockedSession, "bootloader bloqueado, sin token disponible", hardBlocker: false);
@@ -131,24 +289,17 @@ internal static class Program
         var lines = File.ReadAllLines(journalPath);
         var target = Array.FindIndex(lines, line => line.Contains("\"Kind\":\"stage.done\"", StringComparison.Ordinal));
 
-        string tamperDetail;
         if (target < 0)
         {
-            tamperDetail = "no se encontro una entrada adecuada para manipular (revisar)";
-            results.Add(("Manipulacion detectada", false, tamperDetail));
+            results.Add(("Manipulacion detectada", false, "no se encontro una entrada adecuada para manipular"));
         }
         else
         {
             lines[target] = lines[target].Replace("stage.done", "stage.alterado", StringComparison.Ordinal);
             File.WriteAllLines(tamperPath, lines);
 
-            var tampered = new FileJournal(tamperPath, clock);
-            var tamperedVerification = tampered.VerifyChain();
-            tamperDetail = tamperedVerification.Message;
-            results.Add((
-                "Manipulacion detectada",
-                !tamperedVerification.IsValid,
-                tamperDetail));
+            var tamperedVerification = new FileJournal(tamperPath, clock).VerifyChain();
+            results.Add(("Manipulacion detectada", !tamperedVerification.IsValid, tamperedVerification.Message));
         }
 
         // ---------------------------------------------------------------- resumen
@@ -180,6 +331,8 @@ internal static class Program
         Console.WriteLine();
         Console.WriteLine("Nota: esto no valida hardware. La validacion real empieza con los spikes de M0");
         Console.WriteLine("contra el banco de dispositivos.");
+        Console.WriteLine();
+        Console.WriteLine("Para la matriz de cobertura:  mobilefix-check --coverage docs/inventario-demo.csv");
 
         return failed == 0 ? 0 : 1;
     }
@@ -191,11 +344,12 @@ internal static class Program
             service.Connect(session, "USB 2.0 - puerto 3 del hub 1 (simulado)");
             Print(RepairStage.Connect, session);
 
-            service.Identify(session, SampleFingerprint());
+            service.Identify(session, Fingerprint("MediaTek", "Galaxy A13"));
             Print(RepairStage.Identify, session);
 
             service.Classify(session, CoverageAssessment.Evaluate(
                 CoverageVerdict.Partial,
+                CoverageEvidence.SeededDemo,
                 "BROM accesible sin autenticacion DAA/SLA en este modelo",
                 "sin token de fabricante para operaciones de escritura en caliente"));
             Print(RepairStage.Classify, session);
@@ -245,18 +399,6 @@ internal static class Program
 
     private static void Print(RepairStage stage, RepairSession session) =>
         Console.WriteLine($"  [{(int)stage,2}] {stage.Label(),-24} {session.StatusOf(stage),-8} {(stage.IsWriteStage() ? "<-- ESCRIBE" : string.Empty)}");
-
-    private static DeviceFingerprint SampleFingerprint() => new()
-    {
-        SocVendor = "MediaTek",
-        SocModel = "MT6769 Helio G80",
-        Oem = "Samsung",
-        Model = "Galaxy A13",
-        RegionVariant = "SM-A135M / LATAM",
-        BuildId = "TP1A.220624.014",
-        ConfidencePercent = 98,
-        HighestSource = FingerprintSource.BuildProperties,
-    };
 
     private static string? TryStep(Action action)
     {

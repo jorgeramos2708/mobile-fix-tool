@@ -16,6 +16,12 @@
     <ApplicationIcon />
   </PropertyGroup>
 
+  <!-- El inventario de ejemplo viaja con la aplicación para que la pestaña de cobertura
+       tenga datos al abrir el ejecutable público. -->
+  <ItemGroup>
+    <Content Include="../../docs/inventario-demo.csv" Link="inventario-demo.csv" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../MobileFix.Domain/MobileFix.Domain.csproj" />
     <ProjectReference Include="../MobileFix.Ports/MobileFix.Ports.csproj" />

@@ -18,9 +18,12 @@ auditable y sin brickear equipos.
 | **Journal append-only encadenado por SHA-256** con verificación de integridad y detección de manipulación | ✅ |
 | Orquestador de las 13 etapas con registro antes/después y fallo explícito | ✅ |
 | Aplicación de escritorio (WPF) que recorre una sesión simulada | ✅ |
-| **35 pruebas unitarias** del dominio, del journal y de la cobertura, con reloj fijo (deterministas) | ✅ |
+| **55 pruebas unitarias** del dominio, del journal y del motor de cobertura, con reloj fijo (deterministas) | ✅ |
 | Autocomprobación ejecutable (CLI) de las invariantes | ✅ |
-| Identificación (escalera L0–L6), hardware, cobertura, plugins OEM | ⏳ M0–M2 |
+| **Motor de cobertura**: lee el inventario del banco, calcula la matriz y resuelve el veredicto por dispositivo | ✅ M2-03 |
+| **Honestidad de cobertura**: procedencia declarada; con datos de ejemplo todo veredicto es PROVISIONAL | ✅ |
+| Inventario de ejemplo (60 equipos, taller LATAM) + plantilla para el banco real | ✅ |
+| Identificación real (escalera L0–L6), hardware, plugins OEM | ⏳ M0–M2 |
 
 **Nada de esto toca todavía un dispositivo real.** Es la base sobre la que se construye el HAL.
 
@@ -62,7 +65,20 @@ O directamente:
 dotnet build MobileFix.slnx
 dotnet run --project src/MobileFix.Cli
 dotnet run --project src/MobileFix.Desktop
+
+# Matriz de cobertura del banco desde el inventario
+dotnet run --project src/MobileFix.Cli -- --coverage docs/inventario-demo.csv
 ```
+
+### Inventario del banco
+
+- `docs/inventario-demo.csv` — **contrato de máquina**: 60 equipos de ejemplo (taller LATAM), con
+  procedencia declarada en la cabecera. Es lo que lee el motor de cobertura.
+- `docs/INVENTARIO-BANCO-DEMO.xlsx` — la misma información para verla en Excel.
+- `docs/INVENTARIO-BANCO.xlsx` — **plantilla vacía** para fichar el banco real (M0-01).
+
+> Con `provenance=seeded-demo` la cobertura es **provisional** y se muestra como tal en la CLI y en la
+> aplicación. Solo con `provenance=bench` la plataforma declara cobertura medida.
 
 La autocomprobación crea su journal en `%LOCALAPPDATA%\MobileFixDemo\` y termina con código 0
 solo si **las cinco invariantes** se cumplen:

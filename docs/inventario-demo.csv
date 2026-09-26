@@ -1,0 +1,65 @@
+# provenance=seeded-demo
+# source=Banco de ejemplo para desarrollo. NO son mediciones reales del banco.
+# generated=2026-09-26
+# columns=id,brand,model,region,soc_vendor,soc_model,platform,mechanism,requires_auth,bootloader,condition,max_level,t1,t2,t3,t4,bench_location,notes
+id,brand,model,region,soc_vendor,soc_model,platform,mechanism,requires_auth,bootloader,condition,max_level,t1,t2,t3,t4,bench_location,notes
+BF-001,Samsung,Galaxy A03,SM-A035M / LATAM,MediaTek,MT6765 Helio P35,android,brom_mtk,own,unlocked,bootloop,L4,yes,yes,partial,partial,Estante A,Caso tipico de bootloop resuelto con reflasheo
+BF-002,Samsung,Galaxy A13,SM-A135M / LATAM,MediaTek,MT6769 Helio G80,android,brom_mtk,own,unlocked,bootloop,L6,yes,yes,yes,partial,Estante A,Control de identidad del banco
+BF-003,Samsung,Galaxy A23,SM-A235M / LATAM,Qualcomm,SM6225 Snapdragon 680,android,edl_qc,own,unlocked,noboot,L4,yes,yes,partial,no,Estante A,Programador firehose firmado disponible
+BF-004,Samsung,Galaxy A33 5G,SM-A336M / LATAM,Exynos,Exynos 1280,android,eub_exynos,unknown,locked,noboot,L2,yes,partial,no,no,Estante B,Requiere token de fabricante para escritura
+BF-005,Samsung,Galaxy A53 5G,SM-A536M / LATAM,Exynos,Exynos 1280,android,eub_exynos,unknown,locked,boots,L4,yes,partial,no,partial,Estante B,Solo lectura y diagnostico con el material actual
+BF-006,Samsung,Galaxy M33 5G,SM-M336B / LATAM,Exynos,Exynos 1280,android,eub_exynos,unknown,locked,bootloop,L2,yes,partial,no,no,Estante B,
+BF-007,Samsung,Galaxy S21 FE,SM-G990E / LATAM,Qualcomm,SM8350 Snapdragon 888,android,edl_qc,third_party,locked,boots,L4,yes,partial,no,partial,Estante B,EDL autenticado en SoC reciente
+BF-008,Samsung,Galaxy S22 Ultra,SM-S908E / LATAM,Qualcomm,SM8450 Snapdragon 8 Gen 1,android,fastboot,none,unlocked,boots,L6,yes,yes,no,partial,Estante B,"Fastboot operativo, sin escritura EDL"
+BF-009,Samsung,Galaxy Tab A7,SM-T500 / LATAM,Qualcomm,SM6115 Snapdragon 662,android,edl_qc,own,unlocked,boots,L5,yes,yes,yes,partial,Estante C,"Tablet: mismo stack, mas volumen"
+BF-010,Xiaomi,Redmi 9A,M2006C3LG / Global,MediaTek,MT6762 Helio G25,android,brom_mtk,third_party,locked,noboot,L3,yes,partial,no,no,Hub 1,DAA/SLA presente: requiere auth file legitimo
+BF-011,Xiaomi,Redmi 9C,M2006C3MG / Global,MediaTek,MT6765 Helio G35,android,brom_mtk,third_party,locked,bootloop,L3,yes,partial,no,no,Hub 1,Variante con autenticacion en BROM
+BF-012,Xiaomi,Redmi Note 11,2201117TG / Global,Qualcomm,SM6225 Snapdragon 680,android,edl_qc,own,unlocked,boots,L6,yes,yes,yes,partial,Hub 1,Existe variante MTK del mismo modelo: conflicto de identidad a vigilar
+BF-013,Xiaomi,Redmi Note 11 (MTK),2201117TY / Global,MediaTek,MT6781 Helio G96,android,brom_mtk,third_party,unlocked,bootloop,L4,yes,yes,partial,partial,Hub 1,"Misma familia, SoC distinto: la huella debe discriminar"
+BF-014,Xiaomi,Redmi Note 10,M2101K7AG / Global,Qualcomm,SM6150 Snapdragon 678,android,edl_qc,own,unlocked,boots,L5,yes,yes,yes,partial,Hub 1,
+BF-015,Xiaomi,Poco X3 NFC,M2007J20CG / Global,Qualcomm,SM7150 Snapdragon 732G,android,edl_qc,own,unlocked,boots,L6,yes,yes,yes,yes,Hub 1,Recuperacion de datos viable: userdata sin cifrar
+BF-016,Xiaomi,Poco F3,M2012K11AG / Global,Qualcomm,SM8250 Snapdragon 870,android,fastboot,none,unlocked,boots,L6,yes,yes,no,partial,Hub 2,Fastboot con bootloader desbloqueado
+BF-017,Xiaomi,Redmi Pad,22081283G / Global,MediaTek,MT8781 Helio G99,android,brom_mtk,third_party,locked,boots,L4,yes,partial,no,partial,Hub 2,Tablet
+BF-018,Xiaomi,Redmi 12C,22120RN86G / Global,MediaTek,MT6769Z Helio G85,android,brom_mtk,third_party,locked,bootloop,L3,yes,partial,no,no,Hub 2,
+BF-019,Motorola,Moto G31,XT2173-1 / LATAM,MediaTek,MT6769V Helio G85,android,brom_mtk,none,unlocked,boots,L6,yes,yes,yes,partial,Estante A,Referencia de identidad y backup
+BF-020,Motorola,Moto G42,XT2233-1 / LATAM,Qualcomm,SM6225 Snapdragon 680,android,edl_qc,own,unlocked,bootloop,L5,yes,yes,yes,partial,Estante A,
+BF-021,Motorola,Moto E22,XT2229-1 / LATAM,MediaTek,MT6765 Helio G37,android,brom_mtk,none,unlocked,boots,L5,yes,yes,yes,partial,Estante A,
+BF-022,Motorola,Moto G52,XT2221-1 / LATAM,Qualcomm,SM6225-AD Snapdragon 680,android,edl_qc,own,unlocked,boots,L6,yes,yes,yes,yes,Estante A,
+BF-023,Motorola,Moto G71 5G,XT2169-1 / LATAM,Qualcomm,SM6375 Snapdragon 695,android,edl_qc,third_party,locked,noboot,L3,yes,partial,no,no,Estante B,
+BF-024,Tecno,Spark 8C,KG5j / LATAM,Unisoc,T606,android,fdl_unisoc,none,unlocked,bootloop,L3,yes,partial,no,no,Caja pendientes,
+BF-025,Tecno,Spark Go 2022,KG5 / LATAM,Unisoc,SC9863A,android,fdl_unisoc,none,locked,noboot,L2,yes,partial,no,no,Caja pendientes,
+BF-026,Tecno,Camon 19,CI6n / LATAM,MediaTek,MT6789 Helio G85,android,brom_mtk,third_party,locked,boots,L4,yes,partial,no,partial,Caja pendientes,
+BF-027,Tecno,Pova 4,LG7n / LATAM,MediaTek,MT8781 Helio G99,android,brom_mtk,third_party,locked,bootloop,L3,yes,partial,no,no,Caja pendientes,
+BF-028,Infinix,Hot 12,X6817 / LATAM,MediaTek,MT6769 Helio G85,android,brom_mtk,third_party,locked,boots,L4,yes,partial,no,partial,Caja pendientes,
+BF-029,Infinix,Smart 6,X6511 / LATAM,Unisoc,SC9863A,android,fdl_unisoc,none,unlocked,bootloop,L3,yes,partial,no,no,Caja pendientes,
+BF-030,Infinix,Note 12,X663 / LATAM,MediaTek,MT6789 Helio G96,android,brom_mtk,third_party,locked,boots,L4,yes,partial,no,partial,Caja pendientes,
+BF-031,itel,A48,A48 / LATAM,Unisoc,SC9863A,android,fdl_unisoc,none,unlocked,boots,L4,yes,partial,no,partial,Caja pendientes,
+BF-032,itel,A58,A58 / LATAM,Unisoc,SC9863A,android,fdl_unisoc,none,unlocked,noboot,L3,yes,partial,no,no,Caja pendientes,
+BF-033,itel,Vision 3,Vision3 / LATAM,Unisoc,T310,android,fdl_unisoc,none,unlocked,bootloop,L3,yes,partial,no,no,Caja pendientes,
+BF-034,ZTE,Blade A51,A51 / LATAM,Unisoc,SC9863A,android,fdl_unisoc,none,unlocked,boots,L4,yes,partial,no,partial,Estante C,
+BF-035,ZTE,Blade A31,A31 / LATAM,Unisoc,SC9832E,android,fdl_unisoc,none,locked,bootloop,L3,yes,partial,no,no,Estante C,
+BF-036,ZTE,Blade V40,V40 / LATAM,Qualcomm,SM6225 Snapdragon 680,android,edl_qc,own,unlocked,boots,L5,yes,yes,yes,partial,Estante C,
+BF-037,OPPO,A16,CPH2269 / LATAM,MediaTek,MT6765 Helio G35,android,brom_mtk,third_party,locked,bootloop,L3,yes,partial,no,no,Hub 2,
+BF-038,OPPO,A57,CPH2387 / LATAM,Qualcomm,SM6225 Snapdragon 680,android,edl_qc,third_party,locked,boots,L4,yes,partial,no,partial,Hub 2,
+BF-039,realme,C31,RMX3501 / LATAM,Unisoc,T612,android,fdl_unisoc,none,unlocked,bootloop,L3,yes,partial,no,no,Hub 2,
+BF-040,realme,C35,RMX3511 / LATAM,MediaTek,MT6765 Helio G35,android,brom_mtk,third_party,locked,boots,L4,yes,partial,no,partial,Hub 2,
+BF-041,vivo,Y21,V2111 / LATAM,MediaTek,MT6769 Helio G80,android,brom_mtk,third_party,locked,boots,L4,yes,partial,no,partial,Hub 2,
+BF-042,Honor,X6,VNE-LX2 / LATAM,MediaTek,MT6765 Helio G25,android,brom_mtk,third_party,locked,boots,L4,yes,partial,no,partial,Estante C,
+BF-043,Honor,X7,CMA-LX2 / LATAM,Qualcomm,SM6225 Snapdragon 680,android,edl_qc,third_party,locked,boots,L4,yes,partial,no,partial,Estante C,
+BF-044,Huawei,Y6p,MED-LX9 / LATAM,HiSilicon,Kirin 710A,android,adb_only,none,locked,boots,L4,yes,no,no,partial,Estante C,"Bootloader cerrado, sin ruta de escritura conocida"
+BF-045,Huawei,Nova 9,NAM-LX9 / LATAM,Qualcomm,SM7325 Snapdragon 778G,android,adb_only,none,locked,boots,L4,yes,no,no,partial,Estante C,Sin desbloqueo oficial de bootloader
+BF-046,Nokia,C21,TA-1352 / LATAM,Unisoc,SC9863A,android,fdl_unisoc,none,unlocked,boots,L4,yes,partial,no,partial,Estante C,
+BF-047,Nokia,G21,TA-1418 / LATAM,Unisoc,T606,android,fdl_unisoc,none,unlocked,bootloop,L3,yes,partial,no,no,Estante C,
+BF-048,Google,Pixel 6,GB7N6 / Global,Google Tensor,Tensor G1,android,fastboot,third_party,locked,boots,L6,yes,partial,no,partial,Rack de caos,Acceso EDL restringido; solo fastboot firmado
+BF-049,Apple,iPhone 8,A1905 / Global,Apple,A11 Bionic,ios,dfu_apple,own,na,boots,L6,yes,yes,no,partial,Estante C,Restore solo a version firmada; sin downgrade
+BF-050,Apple,iPhone XR,A2105 / Global,Apple,A12 Bionic,ios,dfu_apple,own,na,bootloop,L4,yes,yes,no,partial,Estante C,
+BF-051,Apple,iPhone 11,A2221 / LATAM,Apple,A13 Bionic,ios,dfu_apple,own,na,recovery_only,L5,yes,yes,no,partial,Estante C,Salida de recovery y restore firmado
+BF-052,Apple,iPhone 12,A2402 / LATAM,Apple,A14 Bionic,ios,dfu_apple,own,na,boots,L6,yes,yes,no,yes,Estante C,Backup completo con credenciales del dueño
+BF-053,Apple,iPhone SE 2020,A2296 / Global,Apple,A13 Bionic,ios,dfu_apple,own,na,boots,L5,yes,yes,no,partial,Estante C,
+BF-054,Apple,iPad 9,A2602 / LATAM,Apple,A13 Bionic,ios,dfu_apple,own,na,boots,L5,yes,yes,no,partial,Estante C,Tablet
+BF-055,Lenovo,Tab M10,TB-X306X / LATAM,MediaTek,MT6762 Helio P22,android,brom_mtk,none,unlocked,boots,L5,yes,yes,yes,partial,Estante C,Tablet
+BF-056,Samsung,Galaxy A04,SM-A045M / LATAM,MediaTek,MT6765 Helio P35,android,brom_mtk,none,unlocked,bootloop,L4,yes,yes,yes,partial,Estante A,
+BF-057,Xiaomi,Redmi A2,23026RN54G / Global,MediaTek,MT6761 Helio A22,android,brom_mtk,none,locked,noboot,L3,yes,partial,no,no,Caja pendientes,Gama de entrada
+BF-058,Motorola,Moto E13,XT2345-1 / LATAM,Unisoc,T606,android,fdl_unisoc,none,unlocked,boots,L4,yes,partial,no,partial,Estante A,
+BF-059,Tecno,Spark 10,KI5 / LATAM,Unisoc,T606,android,fdl_unisoc,none,unlocked,boots,L4,yes,partial,no,partial,Caja pendientes,
+BF-060,Samsung,Galaxy A54 5G,SM-A546E / LATAM,Exynos,Exynos 1380,android,eub_exynos,unknown,locked,boots,L4,yes,partial,no,partial,Estante B,Modelo reciente: token de fabricante para escritura
