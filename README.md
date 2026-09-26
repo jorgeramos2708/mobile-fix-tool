@@ -18,6 +18,7 @@ auditable y sin brickear equipos.
 | **Journal append-only encadenado por SHA-256** con verificación de integridad y detección de manipulación | ✅ |
 | Orquestador de las 13 etapas con registro antes/después y fallo explícito | ✅ |
 | Aplicación de escritorio (WPF) que recorre una sesión simulada | ✅ |
+| **35 pruebas unitarias** del dominio, del journal y de la cobertura, con reloj fijo (deterministas) | ✅ |
 | Autocomprobación ejecutable (CLI) de las invariantes | ✅ |
 | Identificación (escalera L0–L6), hardware, cobertura, plugins OEM | ⏳ M0–M2 |
 
@@ -46,10 +47,14 @@ auditable y sin brickear equipos.
 
 ```powershell
 .\build.ps1              # compila la solución
-.\build.ps1 -Test        # compila y ejecuta la autocomprobación (invariantes + journal)
-.\build.ps1 -Run         # compila y arranca la aplicación de escritorio
+.\build.ps1 -Test        # pruebas unitarias + autocomprobación de invariantes
+.\build.ps1 -Publish     # genera artifacts\desktop-standalone\MobileFix.exe (autocontenido)
+.\build.ps1 -Run         # arranca la aplicación de escritorio
 .\build.ps1 -Release     # compila en Release
 ```
+
+El ejecutable autocontenido **no necesita .NET instalado en la máquina de destino**: se puede copiar
+a la PC de un taller y ejecutar. Es la forma de enseñar el avance sin pedir a nadie que instale nada.
 
 O directamente:
 

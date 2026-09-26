@@ -3,6 +3,10 @@
   <Project Path="src/MobileFix.Ports/MobileFix.Ports.csproj" />
   <Project Path="src/MobileFix.UseCases/MobileFix.UseCases.csproj" />
   <Project Path="src/MobileFix.Infrastructure/MobileFix.Infrastructure.csproj" />
+  <Folder Name="/src/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/MobileFix.Domain.Tests/MobileFix.Domain.Tests.csproj" />
+  </Folder>
   <Project Path="src/MobileFix.Cli/MobileFix.Cli.csproj" />
   <Project Path="src/MobileFix.Desktop/MobileFix.Desktop.csproj" />
 </Solution>

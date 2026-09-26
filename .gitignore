@@ -29,6 +29,12 @@ evidence/
 inventario*.xlsx
 !docs/INVENTARIO-BANCO.xlsx
 
+## Copias de seguridad y temporales que no deben versionarse
+*.bak
+*.tmp
+*.orig
+commit-msg*.txt
+
 ## Sistema
 Thumbs.db
 desktop.ini

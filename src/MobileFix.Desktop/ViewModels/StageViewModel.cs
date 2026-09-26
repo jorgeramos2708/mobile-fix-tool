@@ -32,7 +32,11 @@ public sealed class StageViewModel : INotifyPropertyChanged
 
     public string Title => $"{(int)Stage:00} · {Stage.Label()}";
 
-    public string Kind => Stage.IsWriteStage() ? "ESCRIBE" : "solo lectura";
+    public string Kind => Stage.IsWriteStage()
+        ? "ESCRIBE"
+        : Stage.IsReadOnly()
+            ? "solo lectura"
+            : "sin acceso";
 
     public StageStatus Status
     {

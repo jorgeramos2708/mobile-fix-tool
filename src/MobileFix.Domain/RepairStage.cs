@@ -59,15 +59,28 @@ public static class RepairStages
         _ => stage.ToString(),
     };
 
-    /// <summary>Etapas que solo leen. Ninguna puede alterar el dispositivo.</summary>
-    public static bool IsReadOnly(this RepairStage stage) => stage is
+    /// <summary>
+    /// Etapas que acceden al dispositivo, para leer o para escribir.
+    /// Planificar (8), autorizar (9) y reportar (13) no tocan hardware: son cómputo puro
+    /// y por eso no se pueden considerar «lectura».
+    /// </summary>
+    public static bool TouchesDevice(this RepairStage stage) => stage is
         RepairStage.Connect or
         RepairStage.Identify or
         RepairStage.Classify or
         RepairStage.Diagnose or
         RepairStage.Correlate or
         RepairStage.CheckConstraints or
-        RepairStage.Backup;
+        RepairStage.Backup or
+        RepairStage.Repair or
+        RepairStage.Verify or
+        RepairStage.CompareBeforeAfter;
+
+    /// <summary>Etapas que leen del dispositivo y nunca escriben. Son seguras por construcción.</summary>
+    public static bool IsReadOnly(this RepairStage stage) => stage.TouchesDevice() && !stage.IsWriteStage();
+
+    /// <summary>Etapas sin acceso al dispositivo: análisis, autorización y generación de informes.</summary>
+    public static bool IsOffDevice(this RepairStage stage) => !stage.TouchesDevice();
 
     /// <summary>La única etapa que escribe. Toda la arquitectura existe para proteger este hecho.</summary>
     public static bool IsWriteStage(this RepairStage stage) => stage == RepairStage.Repair;
