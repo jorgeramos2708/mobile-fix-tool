@@ -25,7 +25,10 @@ auditable y sin brickear equipos.
 | **Catálogo del mercado mexicano**: 170 modelos con SoC, placa, firmware base, mecanismo y ruta de liberación | ✅ |
 | **Bloqueo de operador**: 22 equipos importados de EEUU; liberación solo por el operador, nunca por bypass | ✅ §26 |
 | Inventario de ejemplo (72 equipos) + plantilla para el banco real | ✅ |
-| Identificación real (escalera L0–L6), hardware, plugins OEM | ⏳ M0–M2 |
+| **Escalera de identificación L0–L6** con detección de conflictos e identidad medida del equipo (placa, build, baseband, parche) | ✅ |
+| **Transporte simulado** con perfiles reales del mercado mexicano: el USB real solo sustituye una clase | ✅ |
+| **Bucle completo**: leer del equipo → identificar → resolver cobertura → veredicto de escritura | ✅ |
+| Hardware real (USB/WinUSB, Sahara, BROM, FDL, EUB, DFU), plugins OEM, reparación | ⏳ M0–M5 |
 
 **Nada de esto toca todavía un dispositivo real.** Es la base sobre la que se construye el HAL.
 
@@ -154,4 +157,5 @@ identidad nueva.
 - [`docs/PLAN-MAESTRO.md`](docs/PLAN-MAESTRO.md) — arquitectura, pipeline, roadmap, ADR
 - [`docs/BACKLOG-M0-M2.md`](docs/BACKLOG-M0-M2.md) — tareas asignables de los tres primeros hitos
 - [`docs/DESIGN-TOKENS.md`](docs/DESIGN-TOKENS.md) — sistema de diseño y semántica de riesgo
+- [`docs/COMPETENCIA.md`](docs/COMPETENCIA.md) — análisis competitivo y los diferenciales a implementar
 - [`docs/INVENTARIO-BANCO.xlsx`](docs/INVENTARIO-BANCO.xlsx) — plantilla del banco de pruebas (M0-01)

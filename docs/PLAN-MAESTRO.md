@@ -949,6 +949,28 @@ un equipo bloqueado.
 
 ---
 
+## 27. Diferencial competitivo
+
+> Análisis completo en [`docs/COMPETENCIA.md`](COMPETENCIA.md). Resumen de la conclusión:
+
+La competencia (Chimera, UnlockTool, UMT) compite en **cantidad de capacidades**: 13.000 modelos,
+actualizaciones cada dos semanas, más procedimientos. Todas fallan en el mismo punto: prometen por
+modelo y fallan por **firmware concreto** (BIT, parche de seguridad, versión de loader).
+
+Nosotros competimos en **certeza**: qué es este equipo, qué se ha demostrado con él, qué va a pasar
+si lo toco, cómo lo deshago y cómo lo demuestro después.
+
+**Los tres diferenciales a implementar primero** (ninguno existe en la competencia y los tres son
+posibles porque la arquitectura ya está construida):
+
+| # | Diferencial | Qué fallo del taller resuelve |
+|---|---|---|
+| 1 | **Gate por parche de seguridad y versión de loader** | Operar sobre un firmware más nuevo que el validado: se rechaza, no se avisa |
+| 2 | **Ensayo previo verificado (dry-run)** | Calcula el plan contra la GPT real y lo valida sin escribir un byte |
+| 3 | **Punto de retorno verificado** | Respaldo de las regiones exactas a tocar, con botón de deshacer |
+
+---
+
 ## Apéndice A — Esquema de carpetas propuesto
 
 ```

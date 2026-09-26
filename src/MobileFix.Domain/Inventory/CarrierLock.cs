@@ -79,6 +79,26 @@ public static class UnlockGuidance
     public static bool IsActionable(UnlockPath path) =>
         path is UnlockPath.CarrierPortal or UnlockPath.CarrierAutomatic;
 
+    /// <summary>
+    /// Orientación a partir de lo que <b>declara el equipo</b>. El equipo dice que está bloqueado;
+    /// no dice si cumple los requisitos, así que la elegibilidad se confirma con el operador antes
+    /// de cobrar nada.
+    /// </summary>
+    public static string DescribeFromDevice(CarrierLockState carrierLock, string? carrier) => carrierLock switch
+    {
+        CarrierLockState.NotApplicable =>
+            "el bloqueo de operador no aplica a este equipo",
+
+        CarrierLockState.Unlocked =>
+            "el equipo se declara libre: verificar leyendo de nuevo el estado antes de facturar la liberación",
+
+        CarrierLockState.LockedToCarrier =>
+            $"bloqueado a {Carrier(carrier)}: la liberación la hace el operador. Comprobar elegibilidad " +
+            "(equipo pagado, contrato cumplido, plazo) antes de cobrar el trámite. La plataforma no libera por bypass",
+
+        _ => Describe(UnlockPath.Unknown, carrier),
+    };
+
     private static string Carrier(string? carrier) =>
         string.IsNullOrWhiteSpace(carrier) ? "operador no declarado" : carrier;
 }

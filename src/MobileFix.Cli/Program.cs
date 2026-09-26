@@ -1,6 +1,8 @@
 using System.Text;
 using MobileFix.Domain;
+using MobileFix.Domain.Identification;
 using MobileFix.Infrastructure;
+using MobileFix.Infrastructure.Hal;
 using MobileFix.Ports;
 using MobileFix.UseCases;
 
@@ -31,6 +33,11 @@ internal static class Program
         if (args.Length > 0 && args[0] is "--coverage" or "-c")
         {
             return RunCoverage(args.Length > 1 ? args[1] : FindDefaultInventory());
+        }
+
+        if (args.Length > 0 && args[0] is "--identify" or "-i")
+        {
+            return RunIdentification();
         }
 
         return RunInvariants();
@@ -153,6 +160,107 @@ internal static class Program
         Console.WriteLine();
         Console.WriteLine(coverage.Describe());
         return 0;
+    }
+
+    // ------------------------------------------------------------------ modo identificacion
+
+    private static int RunIdentification()
+    {
+        Console.WriteLine(new string('=', 78));
+        Console.WriteLine("MobileFix Tool - escalera de identificacion (transporte SIMULADO)");
+        Console.WriteLine(new string('=', 78));
+        Console.WriteLine();
+        Console.WriteLine("  Todo lo que aparece aqui esta leido del equipo a traves del transporte simulado.");
+        Console.WriteLine("  Cuando llegue el banco de pruebas solo se sustituye el transporte: la escalera, el");
+        Console.WriteLine("  calculo de confianza, la deteccion de conflictos y el veredicto ya estan probados.");
+        Console.WriteLine();
+
+        var coverage = TryLoadCoverage();
+
+        foreach (var device in new[]
+                 {
+                     ScriptedProfiles.GalaxyA13Lte(),
+                     ScriptedProfiles.RedmiNote11Qualcomm(),
+                     ScriptedProfiles.PlacaCambiada(),
+                     ScriptedProfiles.ConEnlaceInestable(),
+                 })
+        {
+            PrintIdentification(device, coverage);
+        }
+
+        return 0;
+    }
+
+    private static void PrintIdentification(ScriptedDevice device, BenchCoverage? coverage)
+    {
+        var transport = new ScriptedDeviceTransport(device);
+        var service = new IdentifyDeviceService(transport, IdentificationEvidence.ScriptedSimulation);
+        var outcome = service.RunAsync(coverage).GetAwaiter().GetResult();
+
+        Console.WriteLine(new string('-', 78));
+        Console.WriteLine($"Equipo simulado: {device.Name}");
+        Console.WriteLine(new string('-', 78));
+
+        Console.WriteLine($"  L0 descriptor ....... {device.Descriptor.Describe()}");
+        Console.WriteLine($"  L2 handshake ........ {device.Handshake?.Describe() ?? "(no alcanzado)"}");
+        Console.WriteLine($"  L3 particiones ...... {outcome.Identity.Partitions.Count} leidas, " +
+                          $"{outcome.Identity.CriticalPartitionCount} criticas, " +
+                          $"userdata {(outcome.Identity.Partitions.Any(partition => partition.IsUserData) ? "localizada (no se lee sin autorizacion)" : "no localizada")}");
+        Console.WriteLine($"  L4 sistema .......... {device.Build?.Describe() ?? "(no alcanzado)"}   <-- LEIDO DEL EQUIPO");
+        Console.WriteLine($"  L5 placa ............ {device.Board?.Describe() ?? "(no alcanzado)"}");
+        Console.WriteLine($"  L6 baseband ......... {device.Baseband?.Describe() ?? "(no alcanzado)"}");
+        Console.WriteLine($"  IMEI ................ no persistido · hash {outcome.Identity.ImeiHash ?? "—"}");
+        Console.WriteLine();
+        Console.WriteLine($"  Identidad ........... {outcome.Identity.Describe()}");
+        Console.WriteLine($"  Arranque seguro ..... {(outcome.Identity.SecureBootEnabled == true ? "ACTIVO" : "no")}" +
+                          $" · autenticacion requerida: {(outcome.Identity.AuthenticationRequired == true ? "SI" : "no")}");
+
+        if (outcome.Identity.Conflicts.Count > 0)
+        {
+            Console.WriteLine("  CONFLICTOS DE IDENTIDAD:");
+            foreach (var conflict in outcome.Identity.Conflicts)
+            {
+                Console.WriteLine($"    · {conflict}");
+            }
+        }
+
+        Console.WriteLine($"  Enlace .............. {outcome.Link.Describe()}");
+        Console.WriteLine($"  Bloqueo de operador . {outcome.UnlockGuidance}");
+
+        if (outcome.Coverage is not null)
+        {
+            Console.WriteLine($"  Cobertura ........... {outcome.Coverage.Verdict} · escritura {(outcome.Coverage.AllowsWriting ? "permitida" : "denegada")}");
+            foreach (var reason in outcome.Coverage.Reasons.Take(2))
+            {
+                Console.WriteLine($"      · {reason}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("  Cobertura ........... (sin evidencia de banco cargada)");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine($"  VEREDICTO FINAL: {(outcome.CanWrite ? "se puede escribir" : "NO se puede escribir")}");
+        Console.WriteLine();
+    }
+
+    private static BenchCoverage? TryLoadCoverage()
+    {
+        var path = FindDefaultInventory();
+        if (path is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return new BenchCoverageService(new InventoryCsvReader()).Load(path);
+        }
+        catch (IOException)
+        {
+            return null;
+        }
     }
 
     private static IEnumerable<DeviceFingerprint> SampleFingerprints()
